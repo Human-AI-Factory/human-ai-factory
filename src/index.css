@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink-black: #1a1a1a;
+  --paper-white: #f2efea;
+  --shangmei-red: #991b1b;
+}
+
+body {
+  font-family: 'Noto Serif SC', serif;
+  background-color: var(--paper-white);
+  color: var(--ink-black);
+  margin: 0;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* 工业化网格背景 */
+.grid-overlay {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* 侧边导航样式 */
+.nav-dot {
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--shangmei-red);
+  border-radius: 50%;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  background-color: transparent;
+}
+
+.nav-item.active .nav-dot {
+  background-color: var(--shangmei-red);
+  transform: scale(1.8);
+  box-shadow: 0 0 12px rgba(153, 27, 27, 0.4);
+}
+
+.nav-item.active span {
+  opacity: 1;
+  transform: translateX(0);
+  color: var(--shangmei-red);
+}
+
+/* 卡片悬停效果 */
+.factory-card {
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(5px);
+  transition: all 0.5s ease;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.factory-card:hover {
+  background: white;
+  transform: translateY(-10px);
+  box-shadow: 30px 30px 60px rgba(0,0,0,0.05);
+  border-color: var(--shangmei-red);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .side-nav { display: none; }
+}
+
+/* 移动端优化 */
+@media (max-width: 640px) {
+  /* 标题字号调整 */
+  h1 {
+    font-size: 2.5rem !important;
+  }
+
+  h2 {
+    font-size: 2rem !important;
+  }
+
+  /* Section padding */
+  section {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+
+  /* 卡片内边距 */
+  .factory-card {
+    padding: 1.5rem !important;
+  }
+
+  /* Footer 调整 */
+  footer {
+    padding: 3rem 1.5rem !important;
+  }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 2rem !important;
+  }
+
+  h2 {
+    font-size: 1.75rem !important;
+  }
+
+  .grid-overlay {
+    background-size: 20px 20px;
+  }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) {
+  .factory-card:active {
+    background: white;
+    transform: translateY(-5px);
+  }
+}

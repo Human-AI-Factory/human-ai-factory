@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沪漫工厂 | Human-AI-Factory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --ink-black: #1a1a1a;
+            --paper-white: #f2efea;
+            --shangmei-red: #991b1b;
+        }
+
+        body {
+            font-family: 'Noto Serif SC', serif;
+            background-color: var(--paper-white);
+            color: var(--ink-black);
+            margin: 0;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* 水墨画布层 */
+        #ink-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* 工业化网格背景 (参考 image_8007cf) */
+        .grid-overlay {
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* 侧边导航逻辑样式 */
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border: 1px solid var(--shangmei-red);
+            border-radius: 50%;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background-color: transparent;
+        }
+
+        .nav-item.active .nav-dot {
+            background-color: var(--shangmei-red);
+            transform: scale(1.8);
+            box-shadow: 0 0 12px rgba(153, 27, 27, 0.4);
+        }
+
+        .nav-item.active span {
+            opacity: 1;
+            transform: translateX(0);
+            color: var(--shangmei-red);
+        }
+
+        /* 标题竖排样式 */
+        .vertical-title {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+
+        /* 卡片悬停效果 */
+        .factory-card {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+            transition: all 0.5s ease;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .factory-card:hover {
+            background: white;
+            transform: translateY(-10px);
+            box-shadow: 30px 30px 60px rgba(0,0,0,0.05);
+            border-color: var(--shangmei-red);
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .side-nav { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="ink-canvas"></canvas>
+    <div class="grid-overlay"></div>
+
+    <nav class="side-nav fixed left-8 top-1/2 -translate-y-1/2 z-[100] space-y-8">
+        <a href="#spirit" class="nav-item group flex items-center gap-4 cursor-pointer active" data-target="spirit">
+            <span class="text-xs font-bold opacity-0 -translate-x-2 transition-all">精神 · SPIRIT</span>
+            <div class="nav-dot"></div>
+        </a>
+        <a href="#factory" class="nav-item group flex items-center gap-4 cursor-pointer" data-target="factory">
+            <span class="text-xs font-bold opacity-0 -translate-x-2 transition-all">厂房 · FACTORY</span>
+            <div class="nav-dot"></div>
+        </a>
+        <a href="#projects" class="nav-item group flex items-center gap-4 cursor-pointer" data-target="projects">
+            <span class="text-xs font-bold opacity-0 -translate-x-2 transition-all">项目 · PROJECTS</span>
+            <div class="nav-dot"></div>
+        </a>
+        <a href="#roadmap" class="nav-item group flex items-center gap-4 cursor-pointer" data-target="roadmap">
+            <span class="text-xs font-bold opacity-0 -translate-x-2 transition-all">路径 · ROADMAP</span>
+            <div class="nav-dot"></div>
+        </a>
+    </nav>
+
+    <section id="spirit" class="min-h-screen relative flex items-center justify-center px-10 overflow-hidden">
+        <div class="max-w-6xl w-full grid grid-cols-12 gap-4 items-center">
+            <div class="col-span-12 md:col-span-8">
+                <h1 class="text-6xl md:text-8xl font-bold leading-tight mb-8">
+                    让中国动画的<br>
+                    <span class="text-red-800">“精气神”</span><br>
+                    再活五百年
+                </h1>
+                <p class="text-xl md:text-2xl italic text-gray-600 border-l-4 border-red-800 pl-6 py-2 mb-10">
+                    “让那些孩子们回家以后，过了一年再想起来还是会很激动。”<br>
+                    <span class="text-sm not-italic text-gray-400">— 宫崎骏，1981年访华后语</span>
+                </p>
+                <div class="flex gap-4">
+                    <button class="bg-black text-white px-8 py-3 text-sm hover:bg-red-900 transition">探索厂房</button>
+                    <button class="border border-black px-8 py-3 text-sm hover:bg-black hover:text-white transition">开源社区</button>
+                </div>
+            </div>
+            <div class="absolute right-0 top-1/2 -translate-y-1/2 opacity-[0.03] pointer-events-none select-none">
+                <span class="text-[30rem] font-bold">沪</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="factory" class="min-h-screen flex items-center justify-center py-20 bg-[#e9e6df]">
+        <div class="max-w-7xl w-full px-10">
+            <div class="flex flex-col items-center mb-16">
+                <h2 class="text-5xl font-bold italic mb-4">厂房布局 · FACTORY</h2>
+                <div class="w-24 h-1 bg-red-800"></div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="factory-card p-12 relative overflow-hidden group">
+                    <div class="text-6xl font-bold text-gray-100 absolute top-4 right-8">01</div>
+                    <h3 class="text-3xl font-bold mb-6">沪漫一厂</h3>
+                    <p class="text-gray-600 leading-relaxed mb-10 text-sm">
+                        0成本短篇小说生成器。将碎片灵感、历史底蕴化为连贯的叙事结构，为动漫化提供坚实的文学骨架。
+                    </p>
+                    <div class="flex justify-between items-center border-t border-black/10 pt-6">
+                        <span class="text-xs font-black tracking-widest uppercase">小说生成器</span>
+                        <span class="group-hover:translate-x-2 transition-transform">→</span>
+                    </div>
+                </div>
+
+                <div class="factory-card p-12 relative overflow-hidden group">
+                    <div class="text-6xl font-bold text-gray-100 absolute top-4 right-8">02</div>
+                    <h3 class="text-3xl font-bold mb-6">沪漫二厂</h3>
+                    <p class="text-gray-600 leading-relaxed mb-10 text-sm">
+                        动漫 Agent。深度整合 AIGC 工作流，一键实现从文字脚本到分镜草图、配音字幕的跨越式生成。
+                    </p>
+                    <div class="flex justify-between items-center border-t border-black/10 pt-6">
+                        <span class="text-xs font-black tracking-widest uppercase">Agent Workflow</span>
+                        <span class="group-hover:translate-x-2 transition-transform">→</span>
+                    </div>
+                </div>
+
+                <div class="factory-card p-12 relative overflow-hidden group">
+                    <div class="text-6xl font-bold text-gray-100 absolute top-4 right-8">03</div>
+                    <h3 class="text-3xl font-bold mb-6">沪漫三厂</h3>
+                    <p class="text-gray-600 leading-relaxed mb-10 text-sm">
+                        IP Generator。Scale up 你的创意，不仅是生成内容，更是构建一个完整的、可交互的角色生态小镇。
+                    </p>
+                    <div class="flex justify-between items-center border-t border-black/10 pt-6">
+                        <span class="text-xs font-black tracking-widest uppercase">Scale Up</span>
+                        <span class="group-hover:translate-x-2 transition-transform">→</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects" class="min-h-screen flex items-center justify-center py-20 px-10">
+        <div class="max-w-6xl w-full flex flex-col md:flex-row gap-16 items-center">
+            <div class="flex-1">
+                <div class="text-red-800 font-bold mb-4 tracking-[0.3em]">CURRENT PROJECT</div>
+                <h2 class="text-5xl font-bold mb-8 leading-tight">课本重现计划</h2>
+                <p class="text-gray-600 text-lg leading-loose mb-8">
+                    我们在收集几十年前的小学语文课本，从中挑选《小蝌蚪找妈妈》、《九色鹿》等具有代表性的作品进行 AI 动漫化重构。
+                    <strong>技术不是壁垒，创意先行。</strong> 我们在不完善的技术中，寻找最纯粹的艺术表达。
+                </p>
+                <div class="p-6 bg-white shadow-sm border-l-4 border-red-800 italic text-sm text-gray-500">
+                    “重温 Old Color，重拾那个时代的审美巅峰。”
+                </div>
+            </div>
+            <div class="flex-1 relative">
+                <div class="w-full h-[500px] bg-gray-200 shadow-2xl rounded-sm overflow-hidden relative group">
+                    <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-all duration-500"></div>
+                    <img src="https://via.placeholder.com/800x1000/f2efea/1a1a1a?text=HUMAN-AI+ART" class="w-full h-full object-cover" alt="项目展示">
+                    <div class="absolute bottom-6 left-6 text-white font-bold text-2xl">课本重现 v1.0</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="roadmap" class="min-h-screen bg-black text-white flex items-center py-20 px-10 relative overflow-hidden">
+        <div class="max-w-5xl mx-auto w-full relative z-10">
+            <h2 class="text-5xl font-bold italic mb-24 border-b border-white/20 pb-8">发展路径 · ROADMAP</h2>
+            
+            <div class="space-y-24">
+                <div class="flex flex-col md:flex-row gap-8 items-baseline group">
+                    <div class="text-4xl font-light italic text-red-700 group-hover:scale-110 transition-transform">2026</div>
+                    <div>
+                        <h4 class="text-2xl font-bold mb-4 underline decoration-red-800 underline-offset-8">产品打磨期 (完成闭环)</h4>
+                        <p class="text-gray-400 max-w-xl leading-relaxed">节点化 UI 全面上线，资产交易市场 V1.0 发布，交付首批 5 家企业定制项目。</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-8 items-baseline group opacity-60 hover:opacity-100 transition-opacity">
+                    <div class="text-4xl font-light italic text-red-700 group-hover:scale-110 transition-transform">2027</div>
+                    <div>
+                        <h4 class="text-2xl font-bold mb-4 underline decoration-red-800 underline-offset-8">市场扩张期 (规模获客)</h4>
+                        <p class="text-gray-400 max-w-xl leading-relaxed">签约 50 家出版机构，算力调度平台全面运营，实现公司整体盈亏平衡。</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-8 items-baseline group opacity-30 hover:opacity-100 transition-opacity">
+                    <div class="text-4xl font-light italic text-red-700 group-hover:scale-110 transition-transform">2028</div>
+                    <div>
+                        <h4 class="text-2xl font-bold mb-4 underline decoration-red-800 underline-offset-8">生态构建期 (行业登顶)</h4>
+                        <p class="text-gray-400 max-w-xl leading-relaxed">确立 AIGC 动漫第一平台地位，目标 500 万+ 全球用户，5000 万营收量级。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="absolute -bottom-20 -right-20 text-[25rem] font-bold text-white/5 pointer-events-none italic">FACTORY</div>
+    </section>
+
+    <footer class="bg-white py-20 px-10 border-t border-gray-100">
+        <div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-12">
+            <div class="col-span-2">
+                <div class="text-2xl font-bold text-red-800 mb-6 tracking-widest">沪漫工厂</div>
+                <p class="text-gray-500 text-sm leading-loose">
+                    我们开源相关工具，欢迎创作者共建。<br>
+                    负责人：党圣奇 (人工智能博士生) / 张诗颖 (计算机本科生)<br>
+                    项目交流 / 投资接洽：17830367823
+                </p>
+            </div>
+            <div>
+                <h5 class="font-bold mb-6 text-xs tracking-widest uppercase text-gray-400">最新动态</h5>
+                <ul class="text-xs space-y-4 font-bold">
+                    <li>IRIS@NUS 2026 夏季科研入选</li>
+                    <li>ICML 2026 论文提交完成</li>
+                    <li>“Kramabench”系统感知 ML 发布</li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="font-bold mb-6 text-xs tracking-widest uppercase text-gray-400">公众号 / DEMO</h5>
+                <div class="w-24 h-24 bg-gray-100 flex items-center justify-center border border-dashed border-gray-300">
+                    <span class="text-[10px] text-gray-400">QR CODE</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- 1. 水墨鼠标轨迹系统 ---
+        const canvas = document.getElementById('ink-canvas');
+        const ctx = canvas.getContext('2d');
+        let points = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.onresize = resize;
+        resize();
+
+        window.addEventListener('mousemove', (e) => {
+            // 每移动一定距离产生一个墨点
+            if (points.length === 0 || Math.hypot(e.clientX - points[points.length-1].x, e.clientY - points[points.length-1].y) > 12) {
+                points.push({
+                    x: e.clientX,
+                    y: e.clientY,
+                    size: Math.random() * 18 + 6,
+                    opacity: 0.7,
+                    vx: (Math.random() - 0.5) * 1.5,
+                    vy: (Math.random() - 0.5) * 1.5,
+                    growth: Math.random() * 0.5 + 0.2
+                });
+            }
+        });
+
+        function animateInk() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < points.length; i++) {
+                let p = points[i];
+                ctx.beginPath();
+                // 模拟水墨的非均匀感
+                const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+                gradient.addColorStop(0, `rgba(26, 26, 26, ${p.opacity})`);
+                gradient.addColorStop(1, `rgba(26, 26, 26, 0)`);
+                
+                ctx.fillStyle = gradient;
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 物理与衰减
+                p.x += p.vx;
+                p.y += p.vy;
+                p.size += p.growth;
+                p.opacity -= 0.012;
+
+                if (p.opacity <= 0) {
+                    points.splice(i, 1);
+                    i--;
+                }
+            }
+            requestAnimationFrame(animateInk);
+        }
+        animateInk();
+
+        // --- 2. 侧边导航滚动监听 (Intersection Observer) ---
+        const navItems = document.querySelectorAll('.nav-item');
+        const sections = document.querySelectorAll('section');
+
+        const observerOptions = {
+            root: null,
+            rootMargin: '-45% 0px -45% 0px', // 当 section 到达屏幕中心时触发
+            threshold: 0
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    updateNav(id);
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(section => observer.observe(section));
+
+        function updateNav(activeId) {
+            navItems.forEach(item => {
+                if (item.getAttribute('data-target') === activeId) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        // --- 3. 平滑滚动点击 ---
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = item.getAttribute('href');
+                document.querySelector(targetId).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
